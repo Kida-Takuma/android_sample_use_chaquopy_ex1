@@ -1,46 +1,29 @@
 package com.example.android_sample_use_chaquopy_ex1
 
 import android.os.Bundle
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.android_sample_use_chaquopy_ex1.ui.theme.AndroidSampleUseChaquopyEx1Theme
+import com.chaquo.python.PyException
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            AndroidSampleUseChaquopyEx1Theme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
-                }
-            }
+        setContentView(R.layout.activity_main)
+        if (!Python.isStarted()) {
+            Python.start(AndroidPlatform(this))
         }
-    }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+        val py = Python.getInstance()
+        val module = py.getModule("main")
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AndroidSampleUseChaquopyEx1Theme {
-        Greeting("Android")
+        try {
+            val np_version = module.callAttr("main")
+            findViewById<TextView>(R.id.np_version_text).text = "Numpy Version : $np_version"
+        } catch (e: PyException) {
+            Toast.makeText(this, e.message, Toast.LENGTH_LONG).show()
+        }
     }
 }
